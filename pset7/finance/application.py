@@ -45,15 +45,14 @@ def buy():
     if request.method == "POST":
 
         stock = lookup(request.form.get("symbol").upper())
-        try:
-            shares_bought = int(request.form.get("shares"))
-        except:
-            return apology("Invalid number of shares", 400)
-
         if not stock:
             return apology("Stock not found", 400)
 
-        if shares_bought < 0:
+        try:
+            shares_bought = int(request.form.get("shares"))
+            if shares_bought < 0:
+                return apology("Invalid number of shares", 400)
+        except:
             return apology("Invalid number of shares", 400)
 
         money = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
@@ -62,20 +61,19 @@ def buy():
 
         money_left = money_available - shares_bought * stock_price
 
-        if money_left < 0 or not money_left:
+        if money_left < 0:
             return apology("Invalid Funds", 400)
 
         db.execute("UPDATE users SET cash=:cash WHERE id=:id", cash=money_left, id=session["user_id"])
+        db.execute("INSERT INTO histories (symbol, shares, price, id) VALUES (:symbol, :shares, :price, :id)", symbol=stock["symbol"], shares=shares_bought, price=stock_price, id=session["user_id"])
 
-        db.execute("INSERT INTO histories (symbol, shares, price, id) VALUES (:symbol, :shares, :price, :id)", symbol=stock, shares=shares_bought, price=stock_price, id=session["user_id"])
-
-        num_shares = db.execute("SELECT shares FROM histories WHERE id=:id AND symbol=:symbol", id=session["user_id"], symbol=stock)
+        num_shares = db.execute("SELECT shares FROM histories WHERE id=:id AND symbol=:symbol", id=session["user_id"], symbol=stock["symbol"])
 
         if not num_shares:
-            portfolio = db.execute("INSERT INTO portfolio (user_id, symbol, shares, price, total) VALUES (:user_id, :symbol, :shares, :price, :total)", user_id=session["user_id"], symbol=stock, shares=shares_bought, price=stock_price, total=shares_bought * stock_price)
+            portfolio = db.execute("INSERT INTO portfolio (id, symbol, shares, price, total) VALUES (:id, :symbol, :shares, :price, :total)", id=session["user_id"], symbol=stock["symbol"], shares=str(shares_bought), price=stock_price, total=shares_bought * stock_price)
         else:
-            new_shares = num_shares + shares_bought
-            db.execute("UPDATE portfolio SET shares=:shares WHERE user_id=:id AND symbol=:symbol)", shares=new_shares, id=session["user_id"], symbol=stock)
+            new_shares = str(int(num_shares[0]["shares"]) + shares_bought)
+            db.execute("UPDATE portfolio SET shares=:shares WHERE id=:id AND symbol=:symbol", shares=str(new_shares), id=session["user_id"], symbol=stock["symbol"])
 
         return render_template("index.html")
     else:
@@ -86,6 +84,7 @@ def buy():
 @login_required
 def history():
     """Show history of transactions"""
+
     return apology("TODO")
 
 

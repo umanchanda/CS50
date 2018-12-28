@@ -22,10 +22,10 @@
         </tfoot>
         {% for stock in stocks %}
         <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td>{{ stock.symbol }}</td>
+            <td>{{ stock.shares }}</td>
+            <td>{{ stock.price }}</td>
+            <td>{{ total }}</td>
         </tr>
         {% endfor %}
     </table>
