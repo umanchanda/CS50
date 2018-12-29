@@ -35,14 +35,18 @@ db = SQL("sqlite:///finance.db")
 @login_required
 def index():
     """Show portfolio of stocks"""
-    return apology("TODO", 400)
+
+    stocks = db.execute("SELECT * FROM portfolio WHERE id=:id", id=session['user_id'])
+    return render_template("index.html", stocks=stocks)
 
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
 def buy():
     """Buy shares of stock"""
-    if request.method == "POST":
+    if request.method == "GET":
+        return render_template("buy.html")
+    else:
 
         stock = lookup(request.form.get("symbol").upper())
         if not stock:
@@ -67,17 +71,15 @@ def buy():
         db.execute("UPDATE users SET cash=:cash WHERE id=:id", cash=money_left, id=session["user_id"])
         db.execute("INSERT INTO histories (symbol, shares, price, id) VALUES (:symbol, :shares, :price, :id)", symbol=stock["symbol"], shares=shares_bought, price=stock_price, id=session["user_id"])
 
-        num_shares = db.execute("SELECT shares FROM histories WHERE id=:id AND symbol=:symbol", id=session["user_id"], symbol=stock["symbol"])
+        num_shares = db.execute("SELECT shares FROM portfolio WHERE id=:id AND symbol=:symbol", id=session["user_id"], symbol=stock["symbol"])
 
         if not num_shares:
             portfolio = db.execute("INSERT INTO portfolio (id, symbol, shares, price, total) VALUES (:id, :symbol, :shares, :price, :total)", id=session["user_id"], symbol=stock["symbol"], shares=str(shares_bought), price=stock_price, total=shares_bought * stock_price)
         else:
             new_shares = str(int(num_shares[0]["shares"]) + shares_bought)
-            db.execute("UPDATE portfolio SET shares=:shares WHERE id=:id AND symbol=:symbol", shares=str(new_shares), id=session["user_id"], symbol=stock["symbol"])
+            db.execute("UPDATE portfolio SET shares=:shares WHERE id=:id AND symbol=:symbol", shares=new_shares, id=session["user_id"], symbol=stock["symbol"])
 
         return render_template("index.html")
-    else:
-        return render_template("buy.html")
 
 
 @app.route("/history")
@@ -85,7 +87,9 @@ def buy():
 def history():
     """Show history of transactions"""
 
-    return apology("TODO")
+    histories = db.execute("SELECT * FROM histories WHERE id=:id", id=session["user_id"])
+
+    return render_template("history.html", histories=histories)
 
 
 @app.route("/login", methods=["GET", "POST"])

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Index
+    History
 {% endblock %}
 
 {% block main %}
@@ -11,21 +11,20 @@
                 <th>Symbol</th>
                 <th>Shares</th>
                 <th>Price</th>
-                <th>Total</th>
+                <th>Datetime</th>
             </tr>
         </thead>
         <tfoot>
             <tr>
-                <td colspan="3"></td>
-                <td>10,000</td>
+                <td colspan="4"></td>
             </tr>
         </tfoot>
-        {% for stock in stocks %}
+        {% for history in histories %}
         <tr>
-            <td>{{ stock.symbol }}</td>
-            <td>{{ stock.shares }}</td>
-            <td>{{ stock.price }}</td>
-            <td>{{ stock.total }}</td>
+            <td>{{ history.symbol }}</td>
+            <td>{{ history.shares }}</td>
+            <td>{{ history.price }}</td>
+            <td>{{ history.datetime }}</td>
         </tr>
         {% endfor %}
     </table>
