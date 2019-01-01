@@ -17,7 +17,7 @@
         <tfoot>
             <tr>
                 <td colspan="3"></td>
-                <td>10,000</td>
+                <td><b>{{ money }}</b></td>
             </tr>
         </tfoot>
         {% for stock in stocks %}
@@ -28,5 +28,11 @@
             <td>{{ stock.total }}</td>
         </tr>
         {% endfor %}
+        <tr>
+            <td>CASH</td>
+            <td></td>
+            <td></td>
+            <td>{{ moneyleft }}</td>
+        </tr>
     </table>
 {% endblock %}

@@ -11,12 +11,15 @@ from helpers import apology, login_required, lookup, usd
 app = Flask(__name__)
 
 # Ensure responses aren't cached
+
+
 @app.after_request
 def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
     return response
+
 
 # Custom filter
 app.jinja_env.filters["usd"] = usd
@@ -37,17 +40,25 @@ def index():
     """Show portfolio of stocks"""
 
     stocks = db.execute("SELECT * FROM portfolio WHERE id=:id", id=session['user_id'])
-    return render_template("index.html", stocks=stocks)
+    cash_db = db.execute("SELECT cash FROM users WHERE id=:id", id=session['user_id'])
+
+    money = cash_db[0]['cash']
+    moneyleft = 10000 - money
+    money = '{:.2f}'.format(money)
+    moneyleft = '{:.2f}'.format(moneyleft)
+
+    # moneyspent = 0
+    # for stock in stocks:
+    #     moneyspent += stock[0]['total']
+    # moneyleft = 10000 - moneyspent
+    return render_template("index.html", stocks=stocks, money=money, moneyleft=moneyleft)
 
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
 def buy():
     """Buy shares of stock"""
-    if request.method == "GET":
-        return render_template("buy.html")
-    else:
-
+    if request.method == "POST":
         stock = lookup(request.form.get("symbol").upper())
         if not stock:
             return apology("Stock not found", 400)
@@ -69,17 +80,24 @@ def buy():
             return apology("Invalid Funds", 400)
 
         db.execute("UPDATE users SET cash=:cash WHERE id=:id", cash=money_left, id=session["user_id"])
-        db.execute("INSERT INTO histories (symbol, shares, price, id) VALUES (:symbol, :shares, :price, :id)", symbol=stock["symbol"], shares=shares_bought, price=stock_price, id=session["user_id"])
+        db.execute("INSERT INTO histories (id, symbol, shares, price) VALUES (:id, :symbol, :shares, :price)",
+                    id=session["user_id"], symbol=stock["symbol"], shares=shares_bought, price=stock_price)
 
-        num_shares = db.execute("SELECT shares FROM portfolio WHERE id=:id AND symbol=:symbol", id=session["user_id"], symbol=stock["symbol"])
+        num_shares = db.execute("SELECT shares FROM portfolio WHERE id=:id AND symbol=:symbol",
+                                id=session["user_id"], symbol=stock["symbol"])
 
         if not num_shares:
-            portfolio = db.execute("INSERT INTO portfolio (id, symbol, shares, price, total) VALUES (:id, :symbol, :shares, :price, :total)", id=session["user_id"], symbol=stock["symbol"], shares=str(shares_bought), price=stock_price, total=shares_bought * stock_price)
+            portfolio = db.execute("INSERT INTO portfolio (id, symbol, shares, price, total) VALUES (:id, :symbol, :shares, :price, :total)",
+                                    id=session["user_id"], symbol=stock["symbol"], shares=shares_bought, price=stock_price, total=shares_bought * stock_price)
         else:
             new_shares = str(int(num_shares[0]["shares"]) + shares_bought)
-            db.execute("UPDATE portfolio SET shares=:shares WHERE id=:id AND symbol=:symbol", shares=new_shares, id=session["user_id"], symbol=stock["symbol"])
+            updated_total = int(new_shares) * stock_price
+            db.execute("UPDATE portfolio SET shares=:shares, total=:total WHERE id=:id AND symbol=:symbol",
+                        shares=new_shares, total=updated_total, id=session["user_id"], symbol=stock["symbol"])
 
-        return render_template("index.html")
+        return redirect("/")
+    else:
+        return render_template("buy.html")
 
 
 @app.route("/history")
@@ -152,6 +170,7 @@ def quote():
     else:
         return render_template("quote.html")
 
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
@@ -179,7 +198,8 @@ def register():
         if len(check_username) != 0:
             return apology("username already exists", 400)
 
-        insert = db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", username=request.form.get("username"), hash=hashed_passwd)
+        insert = db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)",
+                            username=request.form.get("username"), hash=hashed_passwd)
 
         session["user_id"] = insert
 
@@ -192,7 +212,47 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock"""
-    return render_template("sell.html")
+
+    portfolio = db.execute("SELECT * FROM portfolio WHERE id=:id", id=session['user_id'])
+
+    if request.method == "POST":
+        stock = lookup(request.form.get("symbol").upper())
+
+        if not stock:
+            return apology("invalid stock", 400)
+
+        stuff = db.execute("SELECT shares,price,total FROM portfolio WHERE id=:id AND symbol=:symbol",
+                            id=session['user_id'], symbol=stock['symbol'])
+        curr_shares = int(stuff[0]['shares'])
+        cash = db.execute("SELECT cash FROM users WHERE id=:id", id=session['user_id'])
+        cash = cash[0]['cash']
+
+        try:
+            shares_sold = int(request.form.get("shares"))
+            if shares_sold < 0:
+                return apology("Negative number of shares", 400)
+            elif curr_shares < shares_sold:
+                return apology("Do not have enough shares", 400)
+        except:
+            return apology("Invalid number of shares", 400)
+
+        db.execute("INSERT INTO histories (id, symbol, shares, price) VALUES (:id, :symbol, :shares, :price)",
+                    id=session["user_id"], symbol=stock["symbol"], shares=-shares_sold, price=stuff[0]['price'])
+
+        new_total = float(cash) + shares_sold * float(stuff[0]['price'])
+        db.execute("UPDATE users SET cash=:cash", cash=new_total)
+
+        new_shares = curr_shares-shares_sold
+        if new_shares > 0:
+            db.execute("UPDATE portfolio SET shares=:shares WHERE id=:id AND symbol=:symbol",
+                        shares=new_shares, id=session['user_id'], symbol=stock['symbol'])
+        else:
+            db.execute("DELETE FROM portfolio WHERE id=:id AND symbol=:symbol", id=session['user_id'], symbol=stock['symbol'])
+
+        # return render_template("sell.html")
+        return redirect("/")
+    else:
+        return render_template("sell.html", stocks=portfolio)
 
 
 def errorhandler(e):
