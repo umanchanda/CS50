@@ -42,16 +42,18 @@ def index():
     stocks = db.execute("SELECT * FROM portfolio WHERE id=:id", id=session['user_id'])
     cash_db = db.execute("SELECT cash FROM users WHERE id=:id", id=session['user_id'])
 
-    money = cash_db[0]['cash']
-    moneyleft = 10000 - money
-    money = '{:.2f}'.format(money)
-    moneyleft = '{:.2f}'.format(moneyleft)
+    total = cash_db[0]['cash']
 
-    # moneyspent = 0
-    # for stock in stocks:
-    #     moneyspent += stock[0]['total']
-    # moneyleft = 10000 - moneyspent
-    return render_template("index.html", stocks=stocks, money=money, moneyleft=moneyleft)
+    moneyspent = 0
+    for stock in stocks:
+        moneyspent += float(stock['total'])
+
+    cash = total - moneyspent
+
+    cash = '{0:.2f}'.format(cash)
+    total = '{0:.2f}'.format(total)
+
+    return render_template("index.html", stocks=stocks, total=total, cash=cash)
 
 
 @app.route("/buy", methods=["GET", "POST"])
