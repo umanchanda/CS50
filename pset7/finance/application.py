@@ -219,6 +219,7 @@ def sell():
 
     if request.method == "POST":
         stock = lookup(request.form.get("symbol").upper())
+        stock_price = lookup(request.form.get("symbol"))['price']
 
         if not stock:
             return apology("invalid stock", 400)
@@ -239,9 +240,9 @@ def sell():
             return apology("Invalid number of shares", 400)
 
         db.execute("INSERT INTO histories (id, symbol, shares, price) VALUES (:id, :symbol, :shares, :price)",
-                    id=session["user_id"], symbol=stock["symbol"], shares=-shares_sold, price=stuff[0]['price'])
+                    id=session["user_id"], symbol=stock["symbol"], shares=-shares_sold, price=stock_price)
 
-        new_total = float(cash) + shares_sold * float(stuff[0]['price'])
+        new_total = float(cash) + shares_sold * float(stock_price)
         db.execute("UPDATE users SET cash=:cash", cash=new_total)
 
         new_shares = curr_shares-shares_sold
