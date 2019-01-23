@@ -4,7 +4,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
-
+import os
 from helpers import apology, login_required, lookup, usd
 
 # Configure application
@@ -31,7 +31,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///finance.db")
+db = SQL("sqlite:///finance.db" or "postgres://bzozeirfyagqhp:ae51562cfb8ffda3e5cd4104f40b7264bcbca2822caf773cee494674725ac1d8@ec2-107-22-238-186.compute-1.amazonaws.com:5432/d9cpbnskg338i8")
 
 
 @app.route("/")
@@ -266,3 +266,7 @@ def errorhandler(e):
 # listen for errors
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)

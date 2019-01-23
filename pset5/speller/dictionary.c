@@ -50,6 +50,22 @@ bool load(const char *dictionary)
     while (fscanf(file, "%s", word) != EOF)
     {
         // TODO
+        int i;
+        node *next;
+
+        for (i = 0; i < LENGTH+1; i++) {
+            if (root->children[i] == NULL) {
+                next = malloc(sizeof(node));
+                next = root->children[i];
+            }
+            else {
+                next = root->children[i];
+            }
+
+            if (word[i] == '\0') {
+                root->is_word = true;
+            }
+        }
     }
 
     // Close dictionary
