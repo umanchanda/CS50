@@ -3,7 +3,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <ctype.h>
+#include <string.h>
 #include "dictionary.h"
 
 // Represents number of children for each node in a trie
@@ -19,6 +20,20 @@ node;
 
 // Represents a trie
 node *root;
+
+int words = 0;
+
+int charToInt(const char c)
+{
+    if (c == '\'')
+    {
+        return N-1;
+    }
+    else
+    {
+        return tolower(c) - '0' - 97;
+    }
+}
 
 // Loads dictionary into memory, returning true if successful else false
 bool load(const char *dictionary)
@@ -54,16 +69,19 @@ bool load(const char *dictionary)
         node *next;
 
         for (i = 0; i < LENGTH+1; i++) {
+            int x = charToInt(word[i]);
+
             if (root->children[i] == NULL) {
                 next = malloc(sizeof(node));
-                next = root->children[i];
+                next = next->children[x];
             }
             else {
-                next = root->children[i];
+                root = root->children[x];
             }
 
             if (word[i] == '\0') {
-                root->is_word = true;
+                next->is_word = true;
+                words++;
             }
         }
     }
@@ -79,19 +97,39 @@ bool load(const char *dictionary)
 unsigned int size(void)
 {
     // TODO
-    return 0;
+    return words;
 }
 
 // Returns true if word is in dictionary else false
 bool check(const char *word)
 {
     // TODO
-    return false;
+    int i, length;
+    for (i = 0, length = strlen(word); i < length; i++)
+    {
+        int x = charToInt(word[i]);
+        root = root->children[x];
+
+        if (!root)
+        {
+            return false;
+        }
+    }
+
+    return root->is_word;
 }
 
 // Unloads dictionary from memory, returning true if successful else false
 bool unload(void)
 {
     // TODO
-    return false;
+    for (int i = 0; i < LENGTH+1; i++)
+    {
+        free(root);
+        if (root->children[i] != NULL)
+        {
+            return false;
+        }
+    }
+    return true;
 }

@@ -10,6 +10,7 @@
 #define LENGTH 45
 
 // Prototypes
+int charToInt(const char c);
 bool load(const char *dictionary);
 unsigned int size(void);
 bool check(const char *word);
