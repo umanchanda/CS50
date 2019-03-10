@@ -31,8 +31,21 @@ int charToInt(const char c)
     }
     else
     {
-        return tolower(c) - '0' - 97;
+        return tolower(c) - 'a';
     }
+}
+
+void unloading(node* curr)
+{
+    int i;
+    for (i = 0; i < N; i++)
+    {
+        if (curr->children[i] != NULL)
+        {
+            unloading(curr->children[i]);
+        }
+    }
+    free(curr);
 }
 
 // Loads dictionary into memory, returning true if successful else false
@@ -65,25 +78,27 @@ bool load(const char *dictionary)
     while (fscanf(file, "%s", word) != EOF)
     {
         // TODO
-        int i;
+        int i, j;
+        node *curr = root;
         node *next;
 
-        for (i = 0; i < LENGTH+1; i++) {
+        for (i = 0; word[i] != '\0'; i++) {
             int x = charToInt(word[i]);
+            //printf("%i\n", x);
 
-            if (root->children[i] == NULL) {
+            if (curr->children[x] == NULL) {
                 next = malloc(sizeof(node));
-                next = next->children[x];
+                next->is_word = false;
+                for (j = 0; j < N; j++) {
+                    next->children[j] = NULL;
+                }
             }
             else {
-                root = root->children[x];
-            }
-
-            if (word[i] == '\0') {
-                next->is_word = true;
-                words++;
+                curr->children[x] = next;
             }
         }
+        next->is_word = true;
+        words++;
     }
 
     // Close dictionary
@@ -96,7 +111,6 @@ bool load(const char *dictionary)
 // Returns number of words in dictionary if loaded else 0 if not yet loaded
 unsigned int size(void)
 {
-    // TODO
     return words;
 }
 
@@ -104,32 +118,33 @@ unsigned int size(void)
 bool check(const char *word)
 {
     // TODO
-    int i, length;
-    for (i = 0, length = strlen(word); i < length; i++)
+    int i;
+    node *curr = root;
+    for (i = 0; word[i] != '\0'; i++)
     {
         int x = charToInt(word[i]);
-        root = root->children[x];
+        curr = curr->children[x];
 
-        if (!root)
+        if (curr == NULL)
         {
             return false;
         }
     }
 
-    return root->is_word;
+    if (curr->is_word == true)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 // Unloads dictionary from memory, returning true if successful else false
 bool unload(void)
 {
-    // TODO
-    for (int i = 0; i < LENGTH+1; i++)
-    {
-        free(root);
-        if (root->children[i] != NULL)
-        {
-            return false;
-        }
-    }
+    node* curr = root;
+    unloading(curr);
     return true;
 }
