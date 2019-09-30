@@ -73,27 +73,30 @@ bool load(const char *dictionary)
 
     // Buffer for a word
     char word[LENGTH + 1];
+    node *curr = root;
 
     // Insert words into trie
     while (fscanf(file, "%s", word) != EOF)
     {
-        // TODO
         int i, j;
-        node *curr = root;
         node *next;
 
-        for (i = 0; word[i] != '\0'; i++) {
+        for (i = 0; word[i] != '\0'; i++)
+        {
             int x = charToInt(word[i]);
             //printf("%i\n", x);
 
-            if (curr->children[x] == NULL) {
+            if (curr->children[x] == NULL)
+            {
                 next = malloc(sizeof(node));
                 next->is_word = false;
-                for (j = 0; j < N; j++) {
+                for (j = 0; j < N; j++)
+                {
                     next->children[j] = NULL;
                 }
             }
-            else {
+            else
+            {
                 curr->children[x] = next;
             }
         }
