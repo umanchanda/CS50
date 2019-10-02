@@ -1,18 +1,22 @@
 from cs50 import get_float
 
 if __name__ == "__main__":
-    cash = get_float("Change owed: ")
+    while True:
+        cash = get_float("Change owed: ")
+        cash *= 100
+        if cash > 0:
+            break
     coins = 0
-    while cash >= 0.25:
-        cash -= 0.25
+    while cash >= 25:
+        cash -= 25
         coins += 1
-    while cash >= 0.10:
-        cash -= 0.10
+    while cash >= 10:
+        cash -= 10
         coins += 1
-    while cash >= 0.05:
-        cash -= 0.05
+    while cash >= 5:
+        cash -= 5
         coins += 1
-    while cash >= 0.01:
-        cash -= 0.01
+    while cash >= 1:
+        cash -= 1
         coins += 1
     print(coins)
