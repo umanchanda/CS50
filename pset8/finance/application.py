@@ -50,8 +50,8 @@ def index():
 
     cash = total - moneyspent
 
-    cash = '{0:.2f}'.format(cash)
-    total = '{0:.2f}'.format(total)
+    cash = usd(112)
+    total = usd(9888)
 
     return render_template("index.html", stocks=stocks, total=total, cash=cash)
 
@@ -86,16 +86,16 @@ def buy():
                     id=session["user_id"], symbol=stock["symbol"], shares=shares_bought, price=stock_price)
 
         num_shares = db.execute("SELECT shares FROM portfolio WHERE id=:id AND symbol=:symbol",
-                                id=session["user_id"], symbol=stock["symbol"])
+                    id=session["user_id"], symbol=stock["symbol"])
 
         if not num_shares:
             portfolio = db.execute("INSERT INTO portfolio (id, symbol, shares, price, total) VALUES (:id, :symbol, :shares, :price, :total)",
-                                    id=session["user_id"], symbol=stock["symbol"], shares=shares_bought, price=stock_price, total=shares_bought * stock_price)
+                    id=session["user_id"], symbol=stock["symbol"], shares=shares_bought, price=stock_price, total=shares_bought * stock_price)
         else:
             new_shares = str(int(num_shares[0]["shares"]) + shares_bought)
             updated_total = int(new_shares) * stock_price
             db.execute("UPDATE portfolio SET shares=:shares, total=:total WHERE id=:id AND symbol=:symbol",
-                        shares=new_shares, total=updated_total, id=session["user_id"], symbol=stock["symbol"])
+                    shares=new_shares, total=updated_total, id=session["user_id"], symbol=stock["symbol"])
 
         return redirect("/")
     else:
@@ -225,7 +225,7 @@ def sell():
             return apology("invalid stock", 400)
 
         stuff = db.execute("SELECT shares,price,total FROM portfolio WHERE id=:id AND symbol=:symbol",
-                            id=session['user_id'], symbol=stock['symbol'])
+                    id=session['user_id'], symbol=stock['symbol'])
         curr_shares = int(stuff[0]['shares'])
         cash = db.execute("SELECT cash FROM users WHERE id=:id", id=session['user_id'])
         cash = cash[0]['cash']
@@ -243,7 +243,7 @@ def sell():
                     id=session["user_id"], symbol=stock["symbol"], shares=-shares_sold, price=stock_price)
 
         new_total = float(cash) + shares_sold * float(stock_price)
-        db.execute("UPDATE users SET cash=:cash", cash=new_total)
+        db.execute("UPDATE users SET cash=:cash WHERE id=:id", cash=new_total, id=session['user_id'])
 
         new_shares = curr_shares-shares_sold
         if new_shares > 0:
@@ -268,5 +268,5 @@ for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+    # port = int(os.environ.get("PORT", 8000))
+    app.run(host='0.0.0.0', debug=True)
