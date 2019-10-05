@@ -31,7 +31,18 @@ def get_form():
 
 @app.route("/form", methods=["POST"])
 def post_form():
-    return render_template("error.html", message="TODO")
+    if request.method == "POST":
+        
+        name = request.form.get("name")
+        house = request.form.get("house")
+        position = request.formg.get("position")
+
+        with open('survey.csv', 'w', newline='') as csvfile:
+            survey = csv.writer(csvfile, delimiter=' ')
+            survey.writerow([name, house, position])
+        return redirect("/sheet")
+    else:
+        return render_template("error.html", message="Error you fucked up")
 
 
 @app.route("/sheet", methods=["GET"])

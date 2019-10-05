@@ -9,6 +9,51 @@
     <form action="/form" method="post">
 
         <!-- TODO -->
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="name" placeholder="Name" type="text">
+        </div>
+
+        <div class="form-group">
+            <select class="form-control" name="house">
+                <option disabled selected value="">House</option>
+                <option value="Gryffindor">Gryffindor</option>
+                <option value="Hufflepuff">Hufflepuff</option>
+                <option value="Ravenclaw">Ravenclaw</option>
+                <option value="Slytherin">Slytherin</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            
+            <div class="form-check">
+                <input class="form-check-input" id="Beater" name="position" type="radio" value="Beater">
+                <label class="form-check-label" for="Beater">
+                    Beater
+                </label>
+            </div>
+        
+            <div class="form-check">
+                <input class="form-check-input" id="Chaser" name="position" type="radio" value="Chaser">
+                <label class="form-check-label" for="Chaser">
+                    Chaser
+                </label>
+            </div>
+        
+            <div class="form-check">
+                <input class="form-check-input" id="Keeper" name="position" type="radio" value="Keeper">
+                <label class="form-check-label" for="Keeper">
+                    Keeper
+                </label>
+            </div>
+        
+            <div class="form-check">
+                <input class="form-check-input" id="Seeker" name="position" type="radio" value="Seeker">
+                <label class="form-check-label" for="Seeker">
+                    Seeker
+                </label>
+            </div>
+        
+    </div>
 
         <!-- http://getbootstrap.com/docs/4.1/components/buttons/ -->
         <button class="btn btn-primary" type="submit">Submit</button>
@@ -18,6 +63,7 @@
     <script>
 
         /* TODO */
+                
 
     </script>
 
