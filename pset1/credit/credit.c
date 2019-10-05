@@ -3,21 +3,21 @@
 #include <string.h>
 #include <cs50.h>
 
-int numDigits(long long);
-bool isValid(long long);
+int numDigits(long);
+bool isValid(long);
 
 int main(void)
 {
-    long long number;
+    long number;
     char n[11];
 
     do
     {
-        number = get_long_long("Number: ");
+        number = get_long("Number: ");
     }
     while (number < 0);
 
-    sprintf(n, "%lld", number);
+    sprintf(n, "%ld", number);
 
 
     if (n[0] == '4' && (numDigits(number) == 13 || numDigits(number) == 16))
@@ -42,7 +42,7 @@ int main(void)
 
 }
 
-int numDigits(long long n)
+int numDigits(long n)
 {
     int digits  = 0;
 
@@ -54,10 +54,10 @@ int numDigits(long long n)
     return digits;
 }
 
-bool isValid(long long n)
+bool isValid(long n)
 {
     char s[11];
-    sprintf(s, "%lld", n);
+    sprintf(s, "%ld", n);
 
     int i, sum = 0;
     int addsum = 0, x2prod = 0;
