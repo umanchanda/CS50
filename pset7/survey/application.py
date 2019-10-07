@@ -1,6 +1,5 @@
 import cs50
 import csv
-
 from flask import Flask, jsonify, redirect, render_template, request
 
 # Configure application
@@ -31,20 +30,19 @@ def get_form():
 
 @app.route("/form", methods=["POST"])
 def post_form():
-    if request.method == "POST":
-        
-        name = request.form.get("name")
-        house = request.form.get("house")
-        position = request.formg.get("position")
+    name = request.form.get("name")
+    house = request.form.get("house")
+    position = request.form.get("position")
 
-        with open('survey.csv', 'w', newline='') as csvfile:
-            survey = csv.writer(csvfile, delimiter=' ')
-            survey.writerow([name, house, position])
-        return redirect("/sheet")
-    else:
-        return render_template("error.html", message="Error you fucked up")
+    with open('survey.csv', 'a') as csvfile:
+        survey = csv.writer(csvfile)
+        survey.writerow([name, house, position])
+    return redirect("/sheet")
 
 
 @app.route("/sheet", methods=["GET"])
 def get_sheet():
-    return render_template("error.html", message="TODO")
+    with open('survey.csv', 'r') as csvfile:
+        c = csv.reader(csvfile)
+        responses = list(c)
+    return render_template("sheet.html", responses=responses)

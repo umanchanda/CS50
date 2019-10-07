@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+<table class="table" id="responses">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>House</th>
+            <th>Position</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for response in responses %}
+        <tr>
+            <td>{{ response[0] }}</td>
+            <td>{{ response[1] }}</td>
+            <td>{{ response[2] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    $(doument).ready(function() {
+        $('#responses').DataTable();
+    });
+</script>
+
+{% endblock %}
+
