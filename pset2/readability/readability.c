@@ -6,7 +6,7 @@
 
 float getLetters(string text)
 {
-    for (int i = 0; i < text.length(); i++)
+    for (int i = 0; i < strlen(text); i++)
     {
         
     }
